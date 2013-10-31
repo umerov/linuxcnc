@@ -246,14 +246,9 @@ void printEmcPose(EmcPose * pose)
 
 void printTPstruct(TP_STRUCT * tp)
 {
-    printf("queueSize=%d\n", tp->queueSize);
+    printf("queueSize=%d\n", tp->queue._len);
     printf("cycleTime=%f\n", tp->cycleTime);
-    printf("vMax=%f\n", tp->vMax);
-    printf("vScale=%f\n", tp->vScale);
-    printf("aMax=%f\n", tp->aMax);
     printf("vLimit=%f\n", tp->vLimit);
-    printf("wMax=%f\n", tp->wMax);
-    printf("wDotMax=%f\n", tp->wDotMax);
     printf("nextId=%d\n", tp->nextId);
     printf("execId=%d\n", tp->execId);
     printf("termCond=%d\n", tp->termCond);

@@ -40,14 +40,15 @@ int tpCreate(TP_STRUCT * const tp, int _queueSize, TC_STRUCT * const tcSpace)
         return -1;
     }
 
+    int size = 0;
     if (_queueSize <= 0) {
-        tp->queueSize = TP_DEFAULT_QUEUE_SIZE;
+        size = TP_DEFAULT_QUEUE_SIZE;
     } else {
-        tp->queueSize = _queueSize;
+        size = _queueSize;
     }
 
     /* create the queue */
-    if (-1 == tcqCreate(&tp->queue, tp->queueSize, tcSpace)) {
+    if (-1 == tcqCreate(&tp->queue, size, tcSpace)) {
         return -1;
     }
 
@@ -86,7 +87,6 @@ int tpClearDIOs() {
 int tpClear(TP_STRUCT * const tp)
 {
     tcqInit(&tp->queue);
-    tp->queueSize = 0;
     tp->goalPos = tp->currentPos;
     tp->nextId = 0;
     tp->execId = 0;
@@ -97,7 +97,6 @@ int tpClear(TP_STRUCT * const tp)
     tp->depth = tp->activeDepth = 0;
     tp->aborting = 0;
     tp->pausing = 0;
-    tp->vScale = emcmotStatus->net_feed_scale;
     tp->synchronized = 0;
     tp->velocity_mode = 0;
     tp->uu_per_rev = 0.0;
@@ -119,12 +118,6 @@ int tpInit(TP_STRUCT * const tp)
 {
     tp->cycleTime = 0.0;
     tp->vLimit = 0.0;
-    tp->vScale = 1.0;
-    tp->aMax = 0.0;
-    tp->vMax = 0.0;
-    tp->ini_maxvel = 0.0;
-    tp->wMax = 0.0;
-    tp->wDotMax = 0.0;
 
     ZERO_EMC_POSE(tp->currentPos);
 
@@ -145,25 +138,6 @@ int tpSetCycleTime(TP_STRUCT * const tp, double secs)
     return 0;
 }
 
-/**
- * Set requested velocity and absolute maximum velocity (bounded by machine).
- * This is called before adding lines or circles, specifying vMax (the velocity
- * requested by the F word) and ini_maxvel, the max velocity possible before
- * meeting a machine constraint caused by an AXIS's max velocity.  (the TP is
- * allowed to go up to this high when feed override >100% is requested)  These
- * settings apply to subsequent moves until changed.
- */
-int tpSetVmax(TP_STRUCT * const tp, double vMax, double ini_maxvel)
-{
-    if (0 == tp || vMax <= 0.0 || ini_maxvel <= 0.0) {
-        return -1;
-    }
-
-    tp->vMax = vMax;
-    tp->ini_maxvel = ini_maxvel;
-
-    return 0;
-}
 
 /**
  * (?) Set the tool tip maximum velocity.
@@ -183,17 +157,6 @@ int tpSetVlimit(TP_STRUCT * const tp, double vLimit)
     return 0;
 }
 
-/** Sets the max acceleration for the trajectory planner. */
-int tpSetAmax(TP_STRUCT * const tp, double aMax)
-{
-    if (0 == tp || aMax <= 0.0) {
-        return -1;
-    }
-
-    tp->aMax = aMax;
-
-    return 0;
-}
 
 /**
  * Sets the id that will be used for the next appended motions.

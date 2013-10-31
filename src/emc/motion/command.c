@@ -966,8 +966,6 @@ void emcmotCommandHandler(void *arg, long period)
                 /* can do it at any time */
                 rtapi_print_msg(RTAPI_MSG_DBG, "SET_VEL");
                 emcmotStatus->vel = emcmotCommand->vel;
-                tpSetVmax(&emcmotDebug->queue, emcmotStatus->vel, 
-                        emcmotCommand->ini_maxvel);
                 break;
 
             case EMCMOT_SET_VEL_LIMIT:
@@ -1007,7 +1005,6 @@ void emcmotCommandHandler(void *arg, long period)
                 /* can do it at any time */
                 rtapi_print_msg(RTAPI_MSG_DBG, "SET_ACCEL");
                 emcmotStatus->acc = emcmotCommand->acc;
-                tpSetAmax(&emcmotDebug->queue, emcmotStatus->acc);
                 break;
 
             case EMCMOT_PAUSE:

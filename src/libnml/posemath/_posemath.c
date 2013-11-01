@@ -34,7 +34,7 @@
 
 #include "sincos.h"
 
-#include <stdio.h>
+/*#include <stdio.h>*/
 
 /* global error number */
 int pmErrno = 0;

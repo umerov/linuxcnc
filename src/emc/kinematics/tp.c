@@ -23,8 +23,6 @@
 #include "motion_debug.h"
 #include "motion_types.h"
 
-#define debug_float(M) rtapi_print("var = %f\n",M)
-
 extern emcmot_status_t *emcmotStatus;
 extern emcmot_debug_t *emcmotDebug;
 

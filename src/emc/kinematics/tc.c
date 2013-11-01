@@ -23,7 +23,7 @@
 #include "emcpos.h"
 #include "tc.h"
 #include "motion_types.h"
-#include "math.h"
+/*#include "math.h"*/
 
 int tcGetStartingUnitVector(TC_STRUCT const * const tc, PmCartesian * const out) {
 

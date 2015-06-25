@@ -2960,9 +2960,9 @@ vars.has_editor.set(editor is not None)
 tooleditor = inifile.find("DISPLAY", "TOOL_EDITOR") or "tooledit"
 tooltable = inifile.find("EMCIO", "TOOL_TABLE")
 lu = units(inifile.find("TRAJ", "LINEAR_UNITS"))
-a_axis_wrapped = inifile.find("AXIS_3", "WRAPPED_ROTARY")
-b_axis_wrapped = inifile.find("AXIS_4", "WRAPPED_ROTARY")
-c_axis_wrapped = inifile.find("AXIS_5", "WRAPPED_ROTARY")
+a_axis_wrapped = inifile.find("JOINT_3", "WRAPPED_ROTARY")
+b_axis_wrapped = inifile.find("JOINT_4", "WRAPPED_ROTARY")
+c_axis_wrapped = inifile.find("JOINT_5", "WRAPPED_ROTARY")
 if coordinate_display:
     if coordinate_display.lower() in ("mm", "metric"): vars.metric.set(1)
     else: vars.metric.set(0)

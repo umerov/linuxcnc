@@ -792,6 +792,19 @@ static VelData getStraightVelocity(double x, double y, double z,
     return out;
 }
 
+static VelData getStraightVelocity(CANON_POSITION pos)
+{
+
+    return getStraightVelocity(pos.x,
+            pos.y,
+            pos.z,
+            pos.a,
+            pos.b,
+            pos.c,
+            pos.u,
+            pos.v,
+            pos.w);
+}
 
 #include <vector>
 struct pt { double x, y, z, a, b, c, u, v, w; int line_no;};

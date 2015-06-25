@@ -1621,8 +1621,8 @@ void ARC_FEED(int line_number,
     // Get planar acceleration bounds
     double a1 = FROM_EXT_LEN(emcAxisGetMaxAcceleration(axis1));
     double a2 = FROM_EXT_LEN(emcAxisGetMaxAcceleration(axis2));
-    double v_max_planar = MIN(v1, v2);
-    double a_max_planar = MIN(a1, a2);
+    double v_max_axes = MIN(v1, v2);
+    double a_max_axes = MIN(a1, a2);
     //FIXME allow tangential acceleration like in TP
     double a_max_normal = a_max_axes * sqrt(3.0)/2.0;
     canon_debug("a_max_axes = %f\n", a_max_axes);

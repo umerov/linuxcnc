@@ -1,3 +1,62 @@
+ver. 1.5.5
+- gmoccapy will take notice of the settings 
+  "DISPLAY", "POSITION_FEEDBACK" in the INI File and 
+  set the DRO accordingly (Code basis from Steffen)
+- Added keyboard shortcut F3 to change to manual mode
+- Added keyboard shortcut F5 to change to MDI Mode
+- Added keyboard shortcut "Enter" for MDI Mode to 
+  submit the selected command
+- Added keyboard shortcut "i" and "I" to switch 
+  jog increments forward and backwards like in axis
+
+ver. 1.5.4.1
+- changed fullsize preview button in manual mode to new position
+  to be the same place in auto and manual mode.
+
+ver. 1.5.4
+- changing in auto mode, being in fullsize preview to edit page leaded
+  to blank screen, I corrected that bug.
+
+ver. 1.5.3.1
+- solved a bug in widget handling, not enabling the ignore limits checkbox,
+  being on a limit switch
+
+ver. 1.5.3
+- added a gscreen patch to search also in the user dir for themes
+
+ver. 1.5.2.2
+- if a user did reduce spindle override to zero and switched on the 
+  spindle, gmoccapy produced a division by zero error. Fixed!
+  reported by "tekmobile"
+
+ver. 1.5.2.1
+- corrected a bug on btn_brake_macro, not beeing active if no virtual
+  keyboard has been installed
+  Thanks to Frans (franstrein) for reporting
+
+ver. 1.5.2
+- In Lathe mode and with startcode G7 the DRO has not been set
+  correctly, while starting in G8 was OK.
+- Some code clearance 
+
+ver. 1.5.1.4
+- Two missing self. leaded to errors if logging was active, 
+  Thanks to Frans (franstrein) for reporting
+
+ver. 1.5.1.3
+- As in full screen mode the GUI covers also the clock, I added a clock
+  and date label under the right buttons. 
+
+ver. 1.5.1.2
+- The handler from glade_status <on_change_line> got lost somehow, so 
+  some hal pin has not been updated correctly  
+- in the glade file the spindle at speed led changed its color to red,
+  I don't know how, I think glade is comming to its limit ;-)
+- changed spindle label handling, now the labels display actual values, 
+  not the read values.
+- The spindle buttons will now be sensitive in auto mode, but only the
+  one witch is active, so spindle direction is displayed clearly  
+
 ver. 1.5.1.1
 - some print commands has been commented out to avoid to much condole infos
 - there was a limit of 100 for tool sensor height, I extended to 999 mm

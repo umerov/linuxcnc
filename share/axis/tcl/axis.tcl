@@ -407,16 +407,16 @@ setup_menu_accel .menu.view end [_ "Show relative position"]
 
 .menu.view add radiobutton \
         -value 0 \
-        -variable joint_mode \
+        -variable teleop_mode \
         -accelerator $ \
-        -command set_joint_mode
+        -command set_teleop_mode
 setup_menu_accel .menu.view end [_ "Joint mode"]
 
 .menu.view add radiobutton \
         -value 1 \
-        -variable joint_mode \
+        -variable teleop_mode \
         -accelerator $ \
-        -command set_joint_mode
+        -command set_teleop_mode
 setup_menu_accel .menu.view end [_ "World mode"]
 
 menu .menu.view.grid
@@ -1946,14 +1946,15 @@ set INTERP_WAITING 4
 set TRAJ_MODE_FREE 1
 set KINEMATICS_IDENTITY 1
 
-set manual [concat [winfo children $_tabs_manual.axes] \
+set manualgroup [concat [winfo children $_tabs_manual.axes] \
     $_tabs_manual.jogf.zerohome.home \
     $_tabs_manual.jogf.jog.jogminus \
     $_tabs_manual.jogf.jog.jogplus \
     $_tabs_manual.spindlef.cw $_tabs_manual.spindlef.ccw \
     $_tabs_manual.spindlef.stop $_tabs_manual.spindlef.brake \
-    $_tabs_manual.flood $_tabs_manual.mist $_tabs_mdi.command \
-    $_tabs_mdi.go $_tabs_mdi.history]
+    $_tabs_manual.flood $_tabs_manual.mist]
+
+set mdigroup [concat $_tabs_mdi.command $_tabs_mdi.go $_tabs_mdi.history]
 
 proc disable_group {ws} { foreach w $ws { $w configure -state disabled } }
 proc enable_group {ws} { foreach w $ws { $w configure -state normal } }
@@ -1998,10 +1999,12 @@ proc update_title {args} {
 }
 
 proc update_state {args} {
-    switch $::task_state \
+    # (The preferred exactly-two-argument form of switch cannot be used
+    # as the patterns must undergo $-expansion)
+    switch -- $::task_state \
         $::STATE_ESTOP { set ::task_state_string [_ "ESTOP"] } \
         $::STATE_ESTOP_RESET { set ::task_state_string [_ "OFF"] } \
-        $::STATE_ON { set ::task_state_string [_ "ON"] } \
+        $::STATE_ON { set ::task_state_string [_ "ON"] }
 
     relief {$task_state == $STATE_ESTOP} .toolbar.machine_estop
     state  {$task_state != $STATE_ESTOP} \
@@ -2067,20 +2070,19 @@ proc update_state {args} {
         set ::position [concat [_ "Position:"] $coord_str $display_str]
     }
 
-    if {$::task_state == $::STATE_ON} {
-	if {$::interp_state == $::INTERP_IDLE} {
-	    if {$::last_interp_state != $::INTERP_IDLE || $::last_task_state != $::task_state} {
-		set_mode_from_tab
-	    }
-	    enable_group $::manual
-	}
-	if {$::queued_mdi_commands < $::max_queued_mdi_commands } {
-	    enable_group $::manual
-	} else {
-	    disable_group $::manual
-	}
+    if {$::task_state == $::STATE_ON && $::interp_state == $::INTERP_IDLE} {
+        if {$::last_interp_state != $::INTERP_IDLE || $::last_task_state != $::task_state} {
+            set_mode_from_tab
+        }
+        enable_group $::manualgroup
     } else {
-        disable_group $::manual
+        disable_group $::manualgroup
+    }
+
+    if {$::task_state == $::STATE_ON && $::queued_mdi_commands < $::max_queued_mdi_commands } {
+        enable_group $::mdigroup
+    } else {
+        disable_group $::mdigroup
     }
 
     if {$::task_state == $::STATE_ON && $::interp_state == $::INTERP_IDLE &&

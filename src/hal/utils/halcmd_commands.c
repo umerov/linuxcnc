@@ -782,7 +782,7 @@ int do_ptype_cmd(char *name)
     }   
     
     rtapi_mutex_give(&(hal_data->mutex));
-    halcmd_error("parameter '%s' not found\n", name);
+    halcmd_error("pin or parameter '%s' not found\n", name);
     return -EINVAL;
 }
 
@@ -827,7 +827,7 @@ int do_getp_cmd(char *name)
     }   
     
     rtapi_mutex_give(&(hal_data->mutex));
-    halcmd_error("parameter '%s' not found\n", name);
+    halcmd_error("pin or parameter '%s' not found\n", name);
     return -EINVAL;
 }
 
@@ -1125,11 +1125,11 @@ int do_loadrt_cmd(char *mod_name, char *args[])
 #endif
 
     if ( retval != 0 ) {
-	halcmd_error("insmod failed, returned %d\n"
+	halcmd_error("insmod for %s failed, returned %d\n"
 #if !defined(RTAPI_USPACE)
             "See the output of 'dmesg' for more information.\n"
 #endif
-        , retval );
+        , mod_name, retval );
 	return -1;
     }
     /* make the args that were passed to the module into a single string */
@@ -1300,6 +1300,11 @@ int do_unloadrt_cmd(char *mod_name)
     n = 0;
     retval1 = 0;
     while ( comps[n][0] != '\0' ) {
+        // special case: initial prefix means it is not a real comp
+        if (strstr(comps[n],HAL_PSEUDO_COMP_PREFIX) == comps[n] ) {
+           n++;
+           continue;
+        }
 	retval = unloadrt_comp(comps[n++]);
 	/* check for fatal error */
 	if ( retval < -1 ) {
@@ -1457,7 +1462,12 @@ int do_loadusr_cmd(char *args[])
 	    /* check for program ending */
 	    retval = waitpid( pid, &status, WNOHANG );
 	    if ( retval != 0 ) {
-		exited = 1;
+		    exited = 1;
+	        if (WIFEXITED(status) && WEXITSTATUS(status)) {
+	            halcmd_error("waitpid failed %s %s\n",prog_name,new_comp_name);
+	            ready = 0;
+	            break;
+	        }
 	    }
 	    /* check for program becoming ready */
             rtapi_mutex_get(&(hal_data->mutex));
@@ -1875,9 +1885,35 @@ static void print_thread_info(char **patterns)
 	tptr = SHMPTR(next_thread);
 	if ( match(patterns, tptr->name) ) {
 		/* note that the scriptmode format string has no \n */
-		// TODO FIXME add thread runtime and max runtime to this print
-	    halcmd_output(((scriptmode == 0) ? "%11ld  %-3s  %20s ( %8ld, %8ld )\n" : "%ld %s %s %ld %ld"),
-		tptr->period, (tptr->uses_fp ? "YES" : "NO"), tptr->name, (long)tptr->runtime, (long)tptr->maxtime);
+            char name[HAL_NAME_LEN+1];
+            hal_pin_t* pin;
+            hal_sig_t *sig;
+            void *dptr;
+  
+            snprintf(name, sizeof(name), "%s.time",tptr->name);
+            pin = halpr_find_pin_by_name(name);
+            if (pin) {
+                if (pin->signal != 0) {
+                    sig = SHMPTR(pin->signal);
+                    dptr = SHMPTR(sig->data_ptr);
+                } else {
+                    sig = 0;
+                    dptr = &(pin->dummysig);
+                }
+
+                halcmd_output(((scriptmode == 0) ? "%11ld  %-3s  %20s ( %8ld, %8ld )\n"
+                                                 : "%ld %s %s %8ld %ld"),
+                              tptr->period,
+                              (tptr->uses_fp ? "YES" : "NO"),
+                              tptr->name,
+                              (long)*(long*)dptr,
+                              (long)tptr->maxtime);
+            } else {
+                rtapi_print_msg(RTAPI_MSG_ERR,
+                     "unexpected: cannot find time pin for %s thread",tptr->name);
+            }
+
+
 	    list_root = &(tptr->funct_list);
 	    list_entry = list_next(list_root);
 	    n = 1;

@@ -127,9 +127,12 @@ class Private_Data:
         self.in_pport_prepare = True
         self.distdir = distdir
         self.available_page =[['intro', _('Stepconf'), True],['start', _('Start'), True],
-                                ['base',_('Base Information'),True],['pport1', _('Parallel Port 1'),True],['pport2', _('Parallel Port 2'),True],
+                                ['base',_('Base Information'),True],
+                                ['pport1', _('Parallel Port 1'),True],['pport2', _('Parallel Port 2'),True],
                                 ['options',_('Options'), True],['axisx', _('Axis X'), True],
-                                ['axisy', _('Axis Y'), True],['axisz', _('Axis Z'), True],['axisa', _('Axis A'), True],
+                                ['axisy', _('Axis Y'), True],['axisz', _('Axis Z'), True],
+                                ['axisu', _('Axis U'), True],['axisv', _('Axis V'), True],
+                                ['axisa', _('Axis A'), True],
                                 ['spindle',_('Spindle'), True],['finished',_('Almost Done'),True]
                              ]
         # internalname / displayed name / steptime/ step space / direction hold / direction setup
@@ -153,6 +156,7 @@ class Private_Data:
 
         (   self.XSTEP, self.XDIR, self.YSTEP, self.YDIR,
             self.ZSTEP, self.ZDIR, self.ASTEP, self.ADIR,
+            self.USTEP, self.UDIR, self.VSTEP, self.VDIR,
             self.ON, self.CW, self.CCW, self.PWM, self.BRAKE,
             self.MIST, self.FLOOD, self.ESTOP, self.AMP,
             self.PUMP, self.DOUT0, self.DOUT1, self.DOUT2, self.DOUT3,
@@ -160,35 +164,37 @@ class Private_Data:
         ) = self.hal_output_names = [
             "xstep", "xdir", "ystep", "ydir",
             "zstep", "zdir", "astep", "adir",
+            "ustep", "udir", "vstep", "vdir",
             "spindle-on", "spindle-cw", "spindle-ccw", "spindle-pwm", "spindle-brake",
             "coolant-mist", "coolant-flood", "estop-out", "xenable",
             "charge-pump", "dout-00", "dout-01", "dout-02", "dout-03",
             "unused-output"]
 
         (   self.ESTOP_IN, self.PROBE, self.PPR, self.PHA, self.PHB,
-            self.HOME_X, self.HOME_Y, self.HOME_Z, self.HOME_A,
-            self.MIN_HOME_X, self.MIN_HOME_Y, self.MIN_HOME_Z, self.MIN_HOME_A,
-            self.MAX_HOME_X, self.MAX_HOME_Y, self.MAX_HOME_Z, self.MAX_HOME_A,
-            self.BOTH_HOME_X, self.BOTH_HOME_Y, self.BOTH_HOME_Z, self.BOTH_HOME_A,
-            self.MIN_X, self.MIN_Y, self.MIN_Z, self.MIN_A,
-            self.MAX_X, self.MAX_Y, self.MAX_Z, self.MAX_A,
-            self.BOTH_X, self.BOTH_Y, self.BOTH_Z, self.BOTH_A,
+            self.HOME_X, self.HOME_Y, self.HOME_Z, self.HOME_A, self.HOME_U, self.HOME_V,
+            self.MIN_HOME_X, self.MIN_HOME_Y, self.MIN_HOME_Z, self.MIN_HOME_A, self.MIN_HOME_U, self.MIN_HOME_V,
+            self.MAX_HOME_X, self.MAX_HOME_Y, self.MAX_HOME_Z, self.MAX_HOME_A, self.MAX_HOME_U, self.MAX_HOME_V,
+            self.BOTH_HOME_X, self.BOTH_HOME_Y, self.BOTH_HOME_Z, self.BOTH_HOME_A, self.BOTH_HOME_U, self.BOTH_HOME_V,
+            self.MIN_X, self.MIN_Y, self.MIN_Z, self.MIN_A, self.MIN_U, self.MIN_V,
+            self.MAX_X, self.MAX_Y, self.MAX_Z, self.MAX_A,self.MAX_U, self.MAX_V,
+            self.BOTH_X, self.BOTH_Y, self.BOTH_Z, self.BOTH_A,self.BOTH_U, self.BOTH_V,
             self.ALL_LIMIT, self.ALL_HOME, self.ALL_LIMIT_HOME, self.DIN0, self.DIN1, self.DIN2, self.DIN3,
             self.UNUSED_INPUT
         ) = self.hal_input_names = [
             "estop-ext", "probe-in", "spindle-index", "spindle-phase-a", "spindle-phase-b",
-            "home-x", "home-y", "home-z", "home-a",
-            "min-home-x", "min-home-y", "min-home-z", "min-home-a",
-            "max-home-x", "max-home-y", "max-home-z", "max-home-a",
-            "both-home-x", "both-home-y", "both-home-z", "both-home-a",
-            "min-x", "min-y", "min-z", "min-a",
-            "max-x", "max-y", "max-z", "max-a",
-            "both-x", "both-y", "both-z", "both-a",
+            "home-x", "home-y", "home-z", "home-a","home-u", "home-v",
+            "min-home-x", "min-home-y", "min-home-z", "min-home-a","min-home-u", "min-home-v",
+            "max-home-x", "max-home-y", "max-home-z", "max-home-a","max-home-u", "max-home-v",
+            "both-home-x", "both-home-y", "both-home-z", "both-home-a", "both-home-u", "both-home-v",
+            "min-x", "min-y", "min-z", "min-a","min-u", "min-v",
+            "max-x", "max-y", "max-z", "max-a", "max-u", "max-v",
+            "both-x", "both-y", "both-z", "both-a", "both-u", "both-v",
             "all-limit", "all-home", "all-limit-home", "din-00", "din-01", "din-02", "din-03",
             "unused-input"]
 
         self.human_output_names = (_("X Step"), _("X Direction"), _("Y Step"), _("Y Direction"),
             _("Z Step"), _("Z Direction"), _("A Step"), _("A Direction"),
+            _("U Step"), _("U Direction"), _("V Step"), _("V Direction"),
             _("Spindle ON"),_("Spindle CW"), _("Spindle CCW"), _("Spindle PWM"), _("Spindle Brake"),
             _("Coolant Mist"), _("Coolant Flood"), _("ESTOP Out"), _("Amplifier Enable"),
             _("Charge Pump"),
@@ -197,19 +203,25 @@ class Private_Data:
 
         self.human_input_names = (_("ESTOP In"), _("Probe In"),
             _("Spindle Index"), _("Spindle Phase A"), _("Spindle Phase B"),
-            _("Home X"), _("Home Y"), _("Home Z"), _("Home A"),
+            _("Home X"), _("Home Y"), _("Home Z"), _("Home A"), _("Home U"), _("Home V"),
             _("Minimum Limit + Home X"), _("Minimum Limit + Home Y"),
             _("Minimum Limit + Home Z"), _("Minimum Limit + Home A"),
+            _("Minimum Limit + Home U"), _("Minimum Limit + Home V"),
             _("Maximum Limit + Home X"), _("Maximum Limit + Home Y"),
             _("Maximum Limit + Home Z"), _("Maximum Limit + Home A"),
+            _("Maximum Limit + Home U"), _("Maximum Limit + Home V"),
             _("Both Limit + Home X"), _("Both Limit + Home Y"),
             _("Both Limit + Home Z"), _("Both Limit + Home A"),
+            _("Both Limit + Home U"), _("Both Limit + Home V"),
             _("Minimum Limit X"), _("Minimum Limit Y"),
             _("Minimum Limit Z"), _("Minimum Limit A"),
+            _("Minimum Limit U"), _("Minimum Limit V"),
             _("Maximum Limit X"), _("Maximum Limit Y"),
             _("Maximum Limit Z"), _("Maximum Limit A"),
+            _("Maximum Limit U"), _("Maximum Limit V"),
             _("Both Limit X"), _("Both Limit Y"),
             _("Both Limit Z"), _("Both Limit A"),
+            _("Both Limit U"), _("Both Limit V"),
             _("All limits"), _("All home"), _("All limits + homes"),
             _("Digital in 0"), _("Digital in 1"), _("Digital in 2"), _("Digital in 3"),
             _("Unused"))
@@ -325,56 +337,24 @@ class Data:
             p = 'pp2_pin%d_in_inv' % pin
             self[p] = 0
 
-        self.xsteprev = 200
-        self.xmicrostep = 2
-        self.xpulleynum = 1
-        self.xpulleyden = 1
-        self.xleadscrew = 20
-        self.xmaxvel = 0
-        self.xmaxacc = 0
+        for i in ('x','y','z','u','v'):
+             self[i+'steprev'] = 200
+             self[i+'microstep'] = 2
+             self[i+'pulleynum'] = 1
+             self[i+'pulleyden'] = 1
+             self[i+'leadscrew'] = 20
+             self[i+'maxvel'] = 0
+             self[i+'maxacc'] = 0
 
-        self.xhomepos = 0
-        self.xminlim =  0
-        self.xmaxlim =  0
-        self.xhomesw =  0
-        self.xhomevel = 0
-        self.xlatchdir = 0
-        self.xscale = 0
+             self[i+'homepos'] = 0
+             self[i+'minlim'] =  0
+             self[i+'maxlim'] =  0
+             self[i+'homesw'] =  0
+             self[i+'homevel'] = 0
+             self[i+'latchdir'] = 0
+             self[i+'scale'] = 0
 
-        self.ysteprev = 200
-        self.ymicrostep = 2
-        self.ypulleynum = 1
-        self.ypulleyden = 1
-        self.yleadscrew = 20
-        self.ymaxvel = 0
-        self.ymaxacc = 0
-
-        self.yhomepos = 0
-        self.yminlim =  0
-        self.ymaxlim =  0
-        self.yhomesw =  0
-        self.yhomevel = 0
-        self.ylatchdir = 0
-        self.yscale = 0
-
-
-        self.zsteprev = 200
-        self.zmicrostep = 2
-        self.zpulleynum = 1
-        self.zpulleyden = 1
-        self.zleadscrew = 20
-        self.zmaxvel = 0
-        self.zmaxacc = 0
-
-        self.zhomepos = 0
-        self.zminlim = 0
-        self.zmaxlim =  0
-        self.zhomesw = 0
-        self.zhomevel = 0
-        self.zlatchdir = 0
-        self.zscale = 0
-
-        # set xyz axes defaults depending on units true = imperial
+        # set xyzuv axes defaults depending on units true = imperial
         self.set_axis_unit_defaults(True)
 
         self.asteprev = 200
@@ -417,7 +397,7 @@ class Data:
     # This only sets data that makes sense to change eg gear ratio don't change
     def set_axis_unit_defaults(self, units=True):
         if units: # imperial
-            for i in ('x','y','z'):
+            for i in ('x','y','z','u','v'):
                 self[i+'maxvel'] = 1
                 self[i+'maxacc'] = 30
                 self[i+'homevel'] = .05
@@ -429,7 +409,7 @@ class Data:
                     self.zminlim = -4
                     self.zmaxlim = 0
         else: # metric
-            for i in ('x','y','z'):
+            for i in ('x','y','z','u','v'):
                 self[i+'maxvel'] = 25
                 self[i+'maxacc'] = 750
                 self[i+'homevel'] = 1.5
@@ -472,13 +452,20 @@ class Data:
         xhz = self.hz('x')
         yhz = self.hz('y')
         zhz = self.hz('z')
+        uhz = self.hz('u')
+        vhz = self.hz('v')
         ahz = self.hz('a')
         if self.axes == 1:
             pps = max(xhz, yhz, zhz, ahz)
         elif self.axes == 0:
             pps = max(xhz, yhz, zhz)
-        else:
+        elif self.axes == 2:
             pps = max(xhz, zhz)
+        elif self.axes == 3:
+            pps = max(xhz, yhz, uhz, vhz)
+        else:
+            print 'error in ideal period calculation - number of axes unrecognized'
+            return
         if self.doublestep():
             base_period = 1e9 / pps
         else:
@@ -795,27 +782,32 @@ class StepconfApp:
         if not debug: return
         print "DEBUG: %s"%str
 
-    # check for realtime kernel
+    # Check for realtime-capable LinuxCNC.
+    # Returns True if the running version of LinuxCNC is realtime-capable
+    # (or if debug is enabled), returns False otherwise.
     def check_for_rt(self):
+        is_realtime_capable = False
         try:
-            actual_kernel = os.uname()[2]
-            if hal.is_sim :
+            if hal.is_sim:
                 self.warning_dialog(self._p.MESS_NO_REALTIME,True)
-                if debug:
-                    return True
+            elif hal.is_rt:
+                if hal.is_kernelspace:
+                    actual_kernel = os.uname()[2]
+                    if hal.kernel_version == actual_kernel:
+                        is_realtime_capable = True
+                    else:
+                        self.warning_dialog(self._p.MESS_KERNEL_WRONG + '%s'%hal.kernel_version,True)
                 else:
-                    return False
-            elif hal.is_rt and not hal.kernel_version == actual_kernel:
-                self.warning_dialog(self._p.MESS_KERNAL_WRONG + '%s'%hal.kernel_version,True)
-                if debug:
-                    return True
-                else:
-                    return False
-            else:
-                return True
+                    is_realtime_capable = True
         except:
             print 'STEPCONF WARNING: check-for-realtime function failed - continuing anyways.'
+            print sys.exc_info()
             return True
+
+        if is_realtime_capable or debug:
+            return True
+        else:
+            return False
 
     # pop up dialog
     def warning_dialog(self,message,is_ok_type):
@@ -948,14 +940,41 @@ class StepconfApp:
         self.w.pin8.set_active(index(SIG.ASTEP))
         self.w.pin9.set_active(index(SIG.ADIR))
 
-    # check for spindle output signal
+    # check for spindle output signals
     def has_spindle_speed_control(self):
         d = self.d
         SIG = self._p
-        return SIG.PWM in (d.pin1, d.pin2, d.pin3, d.pin4, d.pin5, d.pin6, d.pin7,
-            d.pin8, d.pin9, d.pin14, d.pin16, d.pin17) or \
-                SIG.PPR in (d.pin10, d.pin11, d.pin12, d.pin13, d.pin15) or \
-                SIG.PHA in (d.pin10, d.pin11, d.pin12, d.pin13, d.pin15) \
+
+        # Check pp1 for output signals
+        pp1_check = SIG.PWM in (d.pin1, d.pin2, d.pin3, d.pin4, d.pin5, d.pin6,
+            d.pin7, d.pin8, d.pin9, d.pin14, d.pin16, d.pin17)
+        if pp1_check is True: return True
+
+        # now check port 2, which can be set to 'in' or 'out' mode: so can have
+        # other pins number to check then pp1
+        # output pins:
+        for pin in (1,2,3,4,5,6,7,8,9,14,16,17):
+            p = 'pp2_pin%d' % pin
+            if d[p] == SIG.PWM: return True
+
+        # if we get to here - there are no spindle control signals
+        return False
+
+    def has_spindle_encoder(self):
+        SIG = self._p
+        d = self.d
+
+        # pp1 input pins
+        if SIG.PPR in (d.pin10, d.pin11, d.pin12, d.pin13, d.pin15): return True
+        if SIG.PHA in (d.pin10, d.pin11, d.pin12, d.pin13, d.pin15): return True
+
+        # pp2 input pins
+        for pin in (2,3,4,5,6,7,8,9,10,11,12,13,15):
+            p = 'pp2_pin%d_in' % pin
+            if d[p] in (SIG.PPR, SIG.PHA): return True
+
+        # if we get to here - there are no spindle encoder signals
+        return False
 
     # for Axis page calculation updates
     def update_pps(self, axis):
@@ -1208,6 +1227,7 @@ class StepconfApp:
         axnum = "xyza".index(axis)
         step = axis + "step"
         dir = axis + "dir"
+
         halrun.write("""
             loadrt steptest
             loadrt stepgen step_type=0
@@ -1237,8 +1257,10 @@ class StepconfApp:
             halrun.write( "addf parport.0.write fast\n")
         if self.d.number_pports>2:
             halrun.write( "addf parport.0.write fast\n")
-        step_pin,dummy = self.find_output(step)
-        dir_pin,dummy = self.find_output(dir)
+        temp = self.find_output(axis +'step')
+        step_pin = temp[0][0]
+        temp = self.find_output(axis +'dir')
+        dir_pin = temp[0][0] 
         halrun.write("""
             addf stepgen.capture-position slow
             addf steptest.0 slow
@@ -1274,13 +1296,15 @@ class StepconfApp:
             """ % {
                 'resettime': self.d['steptime']
             })
-        amp,amp_port = self.find_output(SIG.AMP)
-        if amp:
+        amp_signals = self.find_output(SIG.AMP)
+        for pin in amp_signals:
+            amp,amp_port = pin
             halrun.write("setp parport.%(portnum)d.pin-%(enablepin)02d-out 1\n"
                 % {'enablepin': amp,'portnum': amp_port})
 
-        estop,e_port = self.find_output(SIG.ESTOP)
-        if estop:
+        estop_signals = self.find_output(SIG.ESTOP)
+        for pin in estop_signals:
+            estop,e_port = pin
             halrun.write("setp parport.%(portnum)d.pin-%(estoppin)02d-out 1\n"
                 % {'estoppin': estop,'portnum': e_port})
 
@@ -1288,7 +1312,17 @@ class StepconfApp:
             inv = getattr(self.d, "pin%dinv" % pin)
             if inv:
                 halrun.write("setp parport.0.pin-%(pin)02d-out-invert 1\n"
-                    % {'pin': pin}) 
+                    % {'pin': pin})
+        if self.d.number_pports > 1:
+            if self.d.pp2_direction:# Input option
+                out_list =(1,14,16,17)
+            else:
+                out_list =(1,2,3,4,5,6,7,8,9,14,16,17)
+            for pin in (out_list):
+                inv = getattr(self.d, "pp2_pin%dinv" % pin)
+                if inv:
+                    halrun.write("setp parport.1.pin-%(pin)02d-out-invert 1\n"
+                    % {'pin': pin})
         if debug:
             halrun.write("loadusr halmeter sig cmd -g 275 415\n")
 
@@ -1350,16 +1384,21 @@ class StepconfApp:
         result = self.w.dialog1.run()
         self.w.dialog1.hide()
         
-        if amp:
-            halrun.write("""setp parport.%d.pin-%02d-out 0\n""" % (amp_port,amp))
-        if estop:
-            halrun.write("""setp parport.%d.pin-%02d-out 0\n""" % (e_port,estop))
+        if amp_signals:
+            for pin in amp_signals:
+                amp,amp_port = pin
+                halrun.write("setp parport.%(portnum)d.pin-%(enablepin)02d-out 0\n"
+                % {'enablepin': amp,'portnum': amp_port})
+        if estop_signals:
+            for pin in estop_signals:
+                estop,e_port = pin
+                halrun.write("setp parport.%(portnum)d.pin-%(estoppin)02d-out 0\n"
+                % {'estoppin': estop,'portnum': e_port})
 
         time.sleep(.001)
         halrun.close()
 
     def update_axis_test(self, *args):
-        print 'update'
         axis = self.axis_under_test
         if axis is None: return
         halrun = self.halrun
@@ -1422,22 +1461,23 @@ class StepconfApp:
         return None
 
     def find_output(self, output):
+        found_list = []
         out_list = set((1, 2, 3, 4, 5, 6, 7, 8, 9, 14, 16, 17))
         port = 0
         for i in out_list:
             pin = self.d["pin%d" % i]
             inv = self.d["pin%dinv" % i]
-            if pin == output: return i,port
+            if pin == output: found_list.append((i,port))
         if self.d.number_pports > 1:
             port = 1
             if self.d.pp2_direction:# Input option
                 out_list =(1,14,16,17)
             else:
                 out_list =(1,2,3,4,5,6,7,8,9,14,16,17)
-            for pin in (out_list):
-                p = 'pp2_pin%d' % pin
-                if pin == output: return i,port
-        return None,None
+            for i in (out_list):
+                pin = self.d['pp2_pin%d' % i]
+                if pin == output: found_list.append((i,port))
+        return found_list
 
     def doublestep(self, steptime=None):
         if steptime is None: steptime = self.d.steptime

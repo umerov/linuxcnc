@@ -129,7 +129,7 @@ SUBDIRS := \
     \
     po \
     \
-    ../docs/src \
+    ../docs/src ../docs/src/source-highlight \
 
 
 
@@ -470,7 +470,6 @@ clean: depclean modclean
 	-rm -rf objects
 	-rm -f $(TARGETS)
 	-rm -f $(GENERATED_MANPAGES)
-	-rm -f $(COPY_CONFIGS)
 	-rm -f ../rtlib/*.$(MODULE_EXT)
 	-rm -f hal/components/conv_*.comp
 
@@ -598,6 +597,8 @@ install-kernel-indep: install-dirs
 	$(EXE) ../scripts/latency-plot $(DESTDIR)$(bindir)
 	$(EXE) ../scripts/latency-histogram $(DESTDIR)$(bindir)
 	$(EXE) ../scripts/moveoff_gui $(DESTDIR)$(bindir)
+	$(EXE) ../scripts/hal-histogram $(DESTDIR)$(bindir)
+	$(EXE) ../scripts/xhc-hb04-accels $(DESTDIR)$(bindir)
 	$(EXE) ../scripts/pyvcp_demo $(DESTDIR)$(bindir)
 	$(EXE) ../scripts/gladevcp_demo $(DESTDIR)$(bindir)
 	$(EXE) ../scripts/linuxcncmkdesktop $(DESTDIR)$(bindir)
@@ -818,9 +819,9 @@ obj-$(CONFIG_HAL_SKELETON) += hal_skeleton.o
 hal_skeleton-objs := hal/drivers/hal_skeleton.o $(MATHSTUB)
 obj-$(CONFIG_OPTO_AC5) += opto_ac5.o
 opto_ac5-objs := hal/drivers/opto_ac5.o $(MATHSTUB)
+endif
 obj-$(CONFIG_HAL_GM) += hal_gm.o
 hal_gm-objs := hal/drivers/hal_gm.o $(MATHSTUB)
-endif
 obj-$(CONFIG_HAL_PPMC) += hal_ppmc.o
 hal_ppmc-objs := hal/drivers/hal_ppmc.o $(MATHSTUB)
 
@@ -873,11 +874,6 @@ hm2_test-objs :=			  \
 setsserial-objs :=			  \
     hal/drivers/mesa-hostmot2/setsserial.o  \
     $(MATHSTUB)
-
-ifneq ($(BUILD_SYS),uspace)
-obj-$(CONFIG_PROBE_PARPORT) += probe_parport.o
-probe_parport-objs := hal/drivers/probe_parport.o $(MATHSTUB)
-endif
 
 obj-$(CONFIG_CLASSICLADDER_RT) += classicladder_rt.o
 classicladder_rt-objs := hal/classicladder/module_hal.o $(MATHSTUB)
@@ -1147,3 +1143,4 @@ cscope:
 cscopeclean:
 	bash -c 'for f in `find ./ -name "cscope.*out"`;do rm $$f;done'
 # vim:ts=8:sts=8:sw=8:noet:
+

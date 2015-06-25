@@ -171,6 +171,7 @@
     <signal name="mode_mdi" handler="on_hal_status_mode_mdi"/>
     <signal name="state_on" handler="on_hal_status_state_on"/>
     <signal name="mode_auto" handler="on_hal_status_mode_auto"/>
+    <signal name="line_changed" handler="on_hal_status_line_changed"/>
     <signal name="file_loaded" handler="on_hal_status_file_loaded"/>
     <signal name="all_homed" handler="on_hal_status_all_homed"/>
     <signal name="interp_idle" handler="on_hal_status_interp_idle"/>
@@ -498,9 +499,9 @@
                                           <object class="HAL_Gremlin" id="gremlin">
                                             <property name="visible">True</property>
                                             <property name="double_buffered">False</property>
+                                            <property name="use_commanded">False</property>
                                             <property name="enable_dro">False</property>
                                             <property name="show_dtg">False</property>
-                                            <property name="use_commanded">False</property>
                                             <signal name="button_press_event" handler="on_gremlin_button_press_event"/>
                                             <signal name="line_clicked" handler="on_gremlin_line_clicked"/>
                                             <signal name="gcode_error" handler="on_gremlin_gcode_error"/>
@@ -777,8 +778,8 @@
                                 <child>
                                   <object class="OffsetPage" id="offsetpage1">
                                     <property name="visible">True</property>
-                                    <property name="foreground_color">#ffff00000000</property>
                                     <property name="highlight_color">#adadd8d8e6e6</property>
+                                    <property name="foreground_color">#ffff00000000</property>
                                     <signal name="selection_changed" handler="on_offsetpage1_selection_changed"/>
                                   </object>
                                   <packing>
@@ -926,11 +927,11 @@
                                         <property name="visible">True</property>
                                         <property name="tooltip_text" translatable="yes">Klick to toggle through the DRO modes</property>
                                         <property name="rel_color">#000000000000</property>
-                                        <property name="homed_color">#0000ffff0000</property>
-                                        <property name="font_size">28</property>
                                         <property name="unhomed_color">#ffff00000000</property>
-                                        <property name="abs_color">#00000000ffff</property>
+                                        <property name="font_size">28</property>
                                         <property name="dtg_color">#ffffffff0000</property>
+                                        <property name="abs_color">#00000000ffff</property>
+                                        <property name="homed_color">#0000ffff0000</property>
                                         <signal name="system_changed" handler="on_Combi_DRO_system_changed"/>
                                         <signal name="units_changed" handler="on_Combi_DRO_units_changed"/>
                                         <signal name="clicked" handler="on_Combi_DRO_clicked"/>
@@ -944,12 +945,12 @@
                                         <property name="visible">True</property>
                                         <property name="tooltip_text" translatable="yes">Klick to toggle through the DRO modes</property>
                                         <property name="rel_color">#000000000000</property>
-                                        <property name="homed_color">#0000ffff0000</property>
+                                        <property name="unhomed_color">#ffff00000000</property>
                                         <property name="font_size">28</property>
                                         <property name="joint_number">1</property>
-                                        <property name="unhomed_color">#ffff00000000</property>
-                                        <property name="abs_color">#00000000ffff</property>
                                         <property name="dtg_color">#ffffffff0000</property>
+                                        <property name="abs_color">#00000000ffff</property>
+                                        <property name="homed_color">#0000ffff0000</property>
                                         <signal name="clicked" handler="on_Combi_DRO_clicked"/>
                                       </object>
                                       <packing>
@@ -961,12 +962,12 @@
                                         <property name="visible">True</property>
                                         <property name="tooltip_text" translatable="yes">Klick to toggle through the DRO modes</property>
                                         <property name="rel_color">#000000000000</property>
-                                        <property name="homed_color">#0000ffff0000</property>
+                                        <property name="unhomed_color">#ffff00000000</property>
                                         <property name="font_size">28</property>
                                         <property name="joint_number">2</property>
-                                        <property name="unhomed_color">#ffff00000000</property>
-                                        <property name="abs_color">#00000000ffff</property>
                                         <property name="dtg_color">#ffffffff0000</property>
+                                        <property name="abs_color">#00000000ffff</property>
+                                        <property name="homed_color">#0000ffff0000</property>
                                         <signal name="clicked" handler="on_Combi_DRO_clicked"/>
                                       </object>
                                       <packing>
@@ -978,12 +979,12 @@
                                         <property name="visible">True</property>
                                         <property name="tooltip_text" translatable="yes">Klick to toggle through the DRO modes</property>
                                         <property name="rel_color">#000000000000</property>
-                                        <property name="homed_color">#0000ffff0000</property>
+                                        <property name="unhomed_color">#ffff00000000</property>
                                         <property name="font_size">28</property>
                                         <property name="joint_number">3</property>
-                                        <property name="unhomed_color">#ffff00000000</property>
-                                        <property name="abs_color">#00000000ffff</property>
                                         <property name="dtg_color">#ffffffff0000</property>
+                                        <property name="abs_color">#00000000ffff</property>
+                                        <property name="homed_color">#0000ffff0000</property>
                                         <signal name="clicked" handler="on_Combi_DRO_clicked"/>
                                       </object>
                                       <packing>
@@ -1690,7 +1691,7 @@
                                                         <property name="visible">True</property>
                                                         <property name="xalign">1</property>
                                                         <property name="ypad">3</property>
-                                                        <property name="label">10000</property>
+                                                        <property name="label">0</property>
                                                         <attributes>
                                                           <attribute name="style" value="normal"/>
                                                           <attribute name="weight" value="bold"/>
@@ -2084,7 +2085,7 @@
                                                             <child>
                                                             <object class="GtkLabel" id="lbl_spindle_act">
                                                             <property name="visible">True</property>
-                                                            <property name="label">S 3500</property>
+                                                            <property name="label">S 0</property>
                                                             <attributes>
                                                             <attribute name="weight" value="bold"/>
                                                             <attribute name="scale" value="1.500000"/>
@@ -2234,16 +2235,16 @@
                                                             <child>
                                                             <object class="HAL_HBar" id="spindle_feedback_bar">
                                                             <property name="visible">True</property>
-                                                            <property name="z2_color">#0000ffff0000</property>
-                                                            <property name="text_template">%i</property>
-                                                            <property name="z0_color">#0000ffff0000</property>
-                                                            <property name="max">6000</property>
-                                                            <property name="z1_color">#0000ffff0000</property>
-                                                            <property name="target_color">#0000ffff0000</property>
                                                             <property name="bg_color">#bebebebebebe</property>
-                                                            <property name="z0_border">0.40000000596046448</property>
-                                                            <property name="target_value">-0.039999999105930328</property>
                                                             <property name="z1_border">0.80000001192092896</property>
+                                                            <property name="z1_color">#0000ffff0000</property>
+                                                            <property name="z2_color">#0000ffff0000</property>
+                                                            <property name="max">6000</property>
+                                                            <property name="z0_border">0.40000000596046448</property>
+                                                            <property name="target_color">#0000ffff0000</property>
+                                                            <property name="text_template">%i</property>
+                                                            <property name="target_value">-0.039999999105930328</property>
+                                                            <property name="z0_color">#0000ffff0000</property>
                                                             </object>
                                                             <packing>
                                                             <property name="position">0</property>
@@ -2253,6 +2254,8 @@
                                                             <object class="HAL_LED" id="spindle_at_speed_led">
                                                             <property name="visible">True</property>
                                                             <property name="led_blink_rate">0</property>
+                                                            <property name="pick_color_on">#0000ffff0000</property>
+                                                            <property name="on_color">greeen</property>
                                                             </object>
                                                             <packing>
                                                             <property name="expand">False</property>
@@ -5270,9 +5273,7 @@ actions</property>
               <object class="GtkVButtonBox" id="vbtb_main">
                 <property name="width_request">100</property>
                 <property name="visible">True</property>
-                <property name="spacing">3</property>
                 <property name="homogeneous">True</property>
-                <property name="layout_style">spread</property>
                 <child>
                   <object class="GtkToggleButton" id="tbtn_estop">
                     <property name="width_request">85</property>
@@ -5413,6 +5414,19 @@ actions</property>
                     <property name="position">6</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkLabel" id="lbl_time">
+                    <property name="visible">True</property>
+                    <property name="label">Time
+Date</property>
+                    <property name="justify">center</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">7</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -5540,6 +5554,18 @@ actions</property>
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkLabel" id="lbl_space_3">
+                    <property name="width_request">85</property>
+                    <property name="height_request">56</property>
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">7</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkToggleButton" id="tbtn_fullsize_preview">
                     <property name="width_request">85</property>
                     <property name="height_request">56</property>
@@ -5549,18 +5575,6 @@ actions</property>
                     <property name="tooltip_text" translatable="yes">make the preview as large as possible</property>
                     <property name="image">img_fullsize_preview</property>
                     <signal name="toggled" handler="on_tbtn_fullsize_preview_toggled"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">7</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="lbl_space_3">
-                    <property name="width_request">85</property>
-                    <property name="height_request">56</property>
-                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>

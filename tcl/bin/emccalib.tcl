@@ -172,10 +172,14 @@ proc makeIniTune {} {
     #puts "af: [array get af]"
 
     foreach fname $halfilelist {
+        if {[string first LIB: $fname] != -1} {
+            # LIB: files are not candidates tunable items
+            continue
+        }
         $haltext config -state normal
         $haltext delete 1.0 end
         if {[catch {open $fname} programin]} {
-            return
+            continue
         } else {
             $haltext insert end [read $programin]
             catch {close $programin}
@@ -184,7 +188,7 @@ proc makeIniTune {} {
         # find the ini references in this hal and build widgets        
         scan [$haltext index end] %d nl
         for {set i 1} { $i < $nl } {incr i} {
-            set tmpstring [$haltext get $i.0 $i.end]
+            set tmpstring [string trim [$haltext get $i.0 $i.end]]
             if {[string match *JOINT* $tmpstring] && ![string match *#* $tmpstring]} {
 	      set halcommand [split $tmpstring " \t"]
 	      if { [lindex $halcommand 0] == "setp" || [lindex $halcommand 1] == "\=" } {

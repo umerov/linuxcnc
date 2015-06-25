@@ -132,6 +132,14 @@ except TclError:
     raise
 
 
+def General_Halt():
+    text = "Do you really want to close linuxcnc?"
+    if not root_window.tk.call("nf_dialog", ".error", "Confirm Close", text, "warning", 1, "Yes", "No"):
+        root_window.destroy()
+
+root_window.protocol("WM_DELETE_WINDOW", General_Halt)
+
+
 program_start_line = 0
 program_start_line_last = -1
 
@@ -1630,17 +1638,32 @@ def dist((x,y,z),(p,q,r)):
 
 # returns units/sec
 def get_jog_speed(a):
-    if vars.joint_mode.get() or a in (0,1,2,6,7,8):
-        return vars.jog_speed.get()/60.
-    else: return vars.jog_aspeed.get()/60.
+    if vars.teleop_mode.get():
+        if a in (0,1,2,6,7,8):
+            return vars.jog_speed.get()/60.
+        else:
+            return vars.jog_aspeed.get()/60.
+    else:
+        if joint_type[a] == 'LINEAR':
+            return vars.jog_speed.get()/60.
+        else:
+            return vars.jog_aspeed.get()/60.
 
 def get_max_jog_speed(a):
-    if vars.joint_mode.get() or a in (0,1,2,6,7,8):
-        m = vars.max_speed.get()
-        m = to_internal_linear_unit(m)
-        if vars.metric.get(): m = m * 25.4
-        return m
-    else: return vars.max_aspeed.get()    
+    max_linear_speed = vars.max_speed.get()
+    max_linear_speed = to_internal_linear_unit(max_linear_speed)
+    if vars.metric.get(): max_linear_speed = max_linear_speed * 25.4
+
+    if vars.teleop_mode.get():
+        if a in (0,1,2,6,7,8):
+            return max_linear_speed
+        else:
+            return vars.max_aspeed.get()
+    else:
+        if joint_type[a] == 'LINEAR':
+            return max_linear_speed
+        else:
+            return vars.max_aspeed.get()
 
 def run_warn():
     warnings = []
@@ -2222,7 +2245,7 @@ class TclCommands(nf.TclCommands):
     def ensure_manual(*event):
         if not manual_ok(): return
         ensure_mode(linuxcnc.MODE_MANUAL)
-        commands.set_joint_mode()
+        commands.set_teleop_mode()
 
     def ensure_mdi(*event):
         if not manual_ok(): return
@@ -2504,9 +2527,9 @@ class TclCommands(nf.TclCommands):
         vars.display_type.set(not vars.display_type.get())
         o.tkRedraw()
 
-    def toggle_joint_mode(*args):
-        vars.joint_mode.set(not vars.joint_mode.get())
-        commands.set_joint_mode()
+    def toggle_teleop_mode(*args):
+        vars.teleop_mode.set(not vars.teleop_mode.get())
+        commands.set_teleop_mode()
 
     def toggle_coord_type(*args):
         vars.coord_type.set(not vars.coord_type.get())
@@ -2545,9 +2568,9 @@ class TclCommands(nf.TclCommands):
         comp['jog.v'] = vars.current_axis.get() == "v"
         comp['jog.w'] = vars.current_axis.get() == "w"
 
-    def set_joint_mode(*args):
-        joint_mode = vars.joint_mode.get()
-        c.teleop_enable(joint_mode)
+    def set_teleop_mode(*args):
+        teleop_mode = vars.teleop_mode.get()
+        c.teleop_enable(teleop_mode)
         c.wait_complete()
 
     def save_gcode(*args):
@@ -2641,7 +2664,7 @@ vars = nf.Variables(root_window,
     ("max_aspeed", DoubleVar),
     ("maxvel_speed", DoubleVar),
     ("max_maxvel", DoubleVar),
-    ("joint_mode", IntVar),
+    ("teleop_mode", IntVar),
     ("motion_mode", IntVar),
     ("kinematics_type", IntVar),
     ("optional_stop", BooleanVar),
@@ -2746,7 +2769,7 @@ root_window.bind("I", lambda event: jogspeed_incremental(-1))
 root_window.bind("!", "set metric [expr {!$metric}]; redraw")
 root_window.bind("@", commands.toggle_display_type)
 root_window.bind("#", commands.toggle_coord_type)
-root_window.bind("$", commands.toggle_joint_mode)
+root_window.bind("$", commands.toggle_teleop_mode)
 
 root_window.bind("<Home>", commands.home_axis)
 root_window.bind("<KP_Home>", kp_wrap(commands.home_axis, "KeyPress"))
@@ -3010,6 +3033,12 @@ for a in range(9):
             step_size_tmp = min(step_size, 1. / f)
             if a < 3: step_size = astep_size = step_size_tmp
             else: astep_size = step_size_tmp
+
+joint_type = [None] * 9
+for j in range(9):
+    if s.axis_mask & (1<<j) == 0: continue
+    section = "AXIS_%d" % j
+    joint_type[j] = inifile.find(section, "TYPE")
 
 if inifile.find("DISPLAY", "MIN_LINEAR_VELOCITY"):
     root_window.tk.call("set_slider_min", float(inifile.find("DISPLAY", "MIN_LINEAR_VELOCITY"))*60)
@@ -3373,7 +3402,7 @@ def balance_ja():
 if s.kinematics_type != linuxcnc.KINEMATICS_IDENTITY:
     c.teleop_enable(0)
     c.wait_complete()
-    vars.joint_mode.set(0)
+    vars.teleop_mode.set(0)
     widgets.joints.grid_propagate(0)
     widgets.axes.grid_propagate(0)
     root_window.after_idle(balance_ja)

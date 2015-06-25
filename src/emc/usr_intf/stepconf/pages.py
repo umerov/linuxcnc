@@ -67,6 +67,7 @@ class Pages:
             if state:
                 if not self['%s_finish'%cur_name]():
                     self.w.notebook1.set_current_page(u)
+                    dbg( 'prepare %s'% name)
                     self['%s_prepare'%name]()
                     self.w.title_label.set_text(text)
                     dbg("set %d current"%u)
@@ -265,6 +266,8 @@ class Pages:
         dbg("active axes: %s = %d"% (self.w.axes.get_active_text(),self.d.axes))
         self.page_set_state('axisz','Z' in self.w.axes.get_active_text())
         self.page_set_state('axisy','Y' in self.w.axes.get_active_text())
+        self.page_set_state('axisu','U' in self.w.axes.get_active_text())
+        self.page_set_state('axisv','V' in self.w.axes.get_active_text())
         self.page_set_state('axisa','A' in self.w.axes.get_active_text())
 
     # Basic page callbacks
@@ -437,7 +440,7 @@ class Pages:
             p = 'pin%dinv' % pin
             self.d[p] = self.w[p].get_active()
         self.d.ioaddr = self.w.ioaddr.get_text()
-        self.page_set_state('spindle',self.a.has_spindle_speed_control())
+        self.page_set_state('spindle',(self.a.has_spindle_speed_control() or self.a.has_spindle_encoder()) )
 
     # pport1 callbacks
     def on_exclusive_check_pp1(self, widget):
@@ -492,6 +495,7 @@ class Pages:
             self.d[p] = self.w[p].get_active()
         self.d.pp2_direction = self.w.pp2_direction.get_active()
         self.d.ioaddr2 = self.w.ioaddr2.get_text()
+        self.page_set_state('spindle',(self.a.has_spindle_speed_control() or self.a.has_spindle_encoder()) )
 
     # pport2 callbacks:
     def on_pp2_direction_changed(self,widget):
@@ -554,6 +558,40 @@ class Pages:
     def on_zmaxvel_changed(self, *args): self.a.update_pps('z')
     def on_zmaxacc_changed(self, *args): self.a.update_pps('z')
     def on_zaxistest_clicked(self, *args): self.a.test_axis('z')
+
+#********************
+# AXIS U PAGE
+#********************
+    def axisu_prepare(self):
+        self.axis_prepare('u')
+    def axisu_finish(self):
+        self.axis_done('u')
+    # AXIS U callbacks
+    def on_usteprev_changed(self, *args): self.a.update_pps('u')
+    def on_umicrostep_changed(self, *args): self.a.update_pps('u')
+    def on_upulleyden_changed(self, *args): self.a.update_pps('u')
+    def on_upulleynum_changed(self, *args): self.a.update_pps('u')
+    def on_uleadscrew_changed(self, *args): self.a.update_pps('u')
+    def on_umaxvel_changed(self, *args): self.a.update_pps('u')
+    def on_umaxacc_changed(self, *args): self.a.update_pps('u')
+    def on_uaxistest_clicked(self, *args): self.a.test_axis('u')
+
+#********************
+# AXIS V PAGE
+#********************
+    def axisv_prepare(self):
+        self.axis_prepare('v')
+    def axisv_finish(self):
+        self.axis_done('v')
+    # AXIS V callbacks
+    def on_vsteprev_changed(self, *args): self.a.update_pps('v')
+    def on_vmicrostep_changed(self, *args): self.a.update_pps('v')
+    def on_vpulleyden_changed(self, *args): self.a.update_pps('v')
+    def on_vpulleynum_changed(self, *args): self.a.update_pps('v')
+    def on_vleadscrew_changed(self, *args): self.a.update_pps('v')
+    def on_vmaxvel_changed(self, *args): self.a.update_pps('v')
+    def on_vmaxacc_changed(self, *args): self.a.update_pps('v')
+    def on_vaxistest_clicked(self, *args): self.a.test_axis('v')
 
 #********************
 # AXIS A PAGE
@@ -674,20 +712,24 @@ class Pages:
         self.w['spindlefiltergain'].set_value(self.d.spindlefiltergain)
         self.w['usespindleatspeed'].set_active(self.d.usespindleatspeed)
 
-        if SIG.PHA in (self.d.pin10, self.d.pin11, self.d.pin12, self.d.pin13, self.d.pin15):
-            self.w.spindlecpr.set_sensitive(1)
+        if self.a.has_spindle_encoder():
+            self.w.spindlecpr.show()
+            self.w.spindlecprlabel.show()
             self.w.spindlefiltergain.show()
             self.w.spindlefiltergainlabel.show()
             self.w.spindlenearscale.show()
             self.w.usespindleatspeed.show()
             self.w.spindlenearscaleunitlabel.show()
         else:
-            self.w.spindlecpr.set_sensitive(0)
+            self.w.spindlecpr.hide()
+            self.w.spindlecprlabel.hide()
             self.w.spindlefiltergain.hide()
             self.w.spindlefiltergainlabel.hide()
             self.w.spindlenearscale.hide()
             self.w.usespindleatspeed.hide()
             self.w.spindlenearscaleunitlabel.hide()
+
+        self.w.output.set_sensitive(self.a.has_spindle_speed_control())
 
     def spindle_finish(self):
         self.d.spindlecarrier = float(self.w.spindlecarrier.get_text())

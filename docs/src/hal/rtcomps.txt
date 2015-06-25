@@ -445,7 +445,7 @@ halcmd: unloadrt encoder
    noise as compared
    to simply differentiating the 'position' output. When the magnitude
    of the true velocity is below
-   min-velocity-estimate, the velocity output is 0.
+   min-speed-estimate, the velocity output is 0.
 * 'encoder.<chan>.x4-mode (bit, I/O) (default: TRUE)' - Enables
    times-4 mode. When true, the counter counts each edge of
    the quadrature waveform (four counts per full cycle). When false, it
@@ -562,8 +562,7 @@ implemented as parameters.
    proportional to derivative of command (velocity).
 * '(float) pid.<loopnum>.FF2' - Second order feedforward - output
    proportional to 2nd derivative
-   of command (acceleration)footnote:[FF2 is not currently implemented,
-   but it will be added. Consider this note a “FIXME” for the code]. 
+   of command (acceleration).
 * '(float) pid.<loopnum>.deadband' - Amount of error that will be ignored 
 * '(float) pid.<loopnum>.maxerror' - Limit on error 
 * '(float) pid.<loopnum>.maxerrorI' - Limit on error integrator 

@@ -963,9 +963,9 @@ check_stuff ( "before command_handler()" );
 	    tpSetTermCond(&emcmotDebug->coord_tp, emcmotCommand->termCond, emcmotCommand->tolerance);
 	    break;
 
-        case EMCMOT_SET_SPINDLESYNC:
-            tpSetSpindleSync(&emcmotDebug->coord_tp, emcmotCommand->spindlesync, emcmotCommand->flags);
-            break;
+	case EMCMOT_SET_SPINDLESYNC:
+		tpSetSpindleSync(&emcmotDebug->coord_tp, emcmotCommand->spindlesync, emcmotCommand->flags);
+		break;
 
 	case EMCMOT_SET_LINE:
 	    /* emcmotDebug->coord_tp up a linear move */
@@ -995,18 +995,29 @@ check_stuff ( "before command_handler()" );
             if(!is_feed_type(emcmotCommand->motion_type) && emcmotStatus->spindle.css_factor) {
                 emcmotStatus->atspeed_next_feed = 1;
             }
-	    /* append it to the emcmotDebug->coord_tp */
+
+	    /* append it to the emcmotDebug->tp */
 	    tpSetId(&emcmotDebug->coord_tp, emcmotCommand->id);
-	    if (-1 == tpAddLine(&emcmotDebug->coord_tp, emcmotCommand->pos, emcmotCommand->motion_type, 
+        int res_addline = tpAddLine(&emcmotDebug->coord_tp, emcmotCommand->pos, emcmotCommand->motion_type, 
                                 emcmotCommand->vel, emcmotCommand->ini_maxvel, 
                                 emcmotCommand->acc, emcmotStatus->enables_new, issue_atspeed,
-                                emcmotCommand->turn)) {
-		reportError(_("can't add linear move"));
-		emcmotStatus->commandStatus = EMCMOT_COMMAND_BAD_EXEC;
-		tpAbort(&emcmotDebug->coord_tp);
-		SET_MOTION_ERROR_FLAG(1);
-		break;
-	    } else {
+                                emcmotCommand->turn);
+        //KLUDGE ignore zero length line
+        if (res_addline < 0) {
+            reportError(_("can't add linear move at line %d, error code %d"),
+                    emcmotCommand->id, res_addline);
+            emcmotStatus->commandStatus = EMCMOT_COMMAND_BAD_EXEC;
+            tpAbort(&emcmotDebug->coord_tp);
+            SET_MOTION_ERROR_FLAG(1);
+            break;
+        } else if (res_addline != 0) {
+            //TODO make this hand-shake more explicit
+            //KLUDGE Non fatal error, need to restore state so that the next
+            //line properly handles at_speed
+            if (issue_atspeed) {
+                emcmotStatus->atspeed_next_feed = 1;
+            }
+        } else {
 		SET_MOTION_ERROR_FLAG(0);
 		/* set flag that indicates all joints need rehoming, if any
 		   joint is moved in joint mode, for machines with no forward
@@ -1040,20 +1051,30 @@ check_stuff ( "before command_handler()" );
                 issue_atspeed = 1;
                 emcmotStatus->atspeed_next_feed = 0;
             }
-	    /* append it to the emcmotDebug->coord_tp */
-	    tpSetId(&emcmotDebug->coord_tp, emcmotCommand->id);
-	    if (-1 ==
-		tpAddCircle(&emcmotDebug->coord_tp, emcmotCommand->pos,
-                            emcmotCommand->center, emcmotCommand->normal,
+
+	    /* append it to the emcmotDebug->tp */
+		tpSetId(&emcmotDebug->coord_tp, emcmotCommand->id);
+		int res_addcircle = tpAddCircle(&emcmotDebug->coord_tp, emcmotCommand->pos,
+							emcmotCommand->center, emcmotCommand->normal,
                             emcmotCommand->turn, emcmotCommand->motion_type,
                             emcmotCommand->vel, emcmotCommand->ini_maxvel,
-                            emcmotCommand->acc, emcmotStatus->enables_new, issue_atspeed)) {
-		reportError(_("can't add circular move"));
+                            emcmotCommand->acc, emcmotStatus->enables_new, issue_atspeed);
+        if (res_addcircle < 0) {
+            reportError(_("can't add circular move at line %d, error code %d"),
+                    emcmotCommand->id, res_addcircle);
 		emcmotStatus->commandStatus = EMCMOT_COMMAND_BAD_EXEC;
 		tpAbort(&emcmotDebug->coord_tp);
 		SET_MOTION_ERROR_FLAG(1);
 		break;
-	    } else {
+        } else if (res_addcircle != 0) {
+            //FIXME! This is a band-aid for a single issue, but there may be
+            //other consequences of non-fatal errors from AddXXX functions. We
+            //either need to fix the root cause (subtle position error after
+            //homing), or have a full restore here.
+            if (issue_atspeed) {
+                emcmotStatus->atspeed_next_feed = 1;
+            }
+        } else {
 		SET_MOTION_ERROR_FLAG(0);
 		/* set flag that indicates all joints need rehoming, if any
 		   joint is moved in joint mode, for machines with no forward
@@ -1496,12 +1517,14 @@ check_stuff ( "before command_handler()" );
 		break;
 	    }
 
-	    /* append it to the emcmotDebug->coord_tp */
+
+	    /* append it to the emcmotDebug->tp */
 	    tpSetId(&emcmotDebug->coord_tp, emcmotCommand->id);
-	    if (-1 == tpAddRigidTap(&emcmotDebug->coord_tp, emcmotCommand->pos, emcmotCommand->vel, emcmotCommand->ini_maxvel, emcmotCommand->acc, emcmotStatus->enables_new)) {
-                emcmotStatus->atspeed_next_feed = 0; /* rigid tap always waits for spindle to be at-speed */
-		reportError(_("can't add rigid tap move"));
-		emcmotStatus->commandStatus = EMCMOT_COMMAND_BAD_EXEC;
+	    int res_addtap = tpAddRigidTap(&emcmotDebug->coord_tp, emcmotCommand->pos, emcmotCommand->vel, emcmotCommand->ini_maxvel, emcmotCommand->acc, emcmotStatus->enables_new);
+        if (res_addtap < 0) {
+            emcmotStatus->atspeed_next_feed = 0; /* rigid tap always waits for spindle to be at-speed */
+            reportError(_("can't add rigid tap move at line %d, error code %d"),
+                    emcmotCommand->id, res_addtap);
 		tpAbort(&emcmotDebug->coord_tp);
 		SET_MOTION_ERROR_FLAG(1);
 		break;

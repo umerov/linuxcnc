@@ -75,7 +75,7 @@ except:
 # libdir is the path to Gscreen python files
 # datadir is where the standarad GLADE files are
 # imagedir is for icons
-# themesdir is path to system's GTK2 theme folder
+# themedir is path to system's GTK2 theme folder
 BASE = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), ".."))
 libdir = os.path.join(BASE, "lib", "python")
 datadir = os.path.join(BASE, "share", "linuxcnc")
@@ -83,6 +83,7 @@ imagedir = os.path.join(BASE, "share","gscreen","images")
 SKINPATH = os.path.join(BASE, "share","gscreen","skins")
 sys.path.insert(0, libdir)
 themedir = "/usr/share/themes"
+userthemedir = os.path.join(os.path.expanduser("~"), ".themes")
 
 xmlname = os.path.join(datadir,"gscreen.glade")
 xmlname2 = os.path.join(datadir,"gscreen2.glade")
@@ -268,6 +269,9 @@ class Data:
         self.feed_override = 1.0
         self.feed_override_inc = .05
         self.feed_override_max = 2.0
+        self.rapid_override = 1.0
+        self.rapid_override_inc = .05
+        self.rapid_override_max = 1.0
         self.spindle_override = 1.0
         self.spindle_override_inc = .05
         self.spindle_override_max = 1.2
@@ -960,18 +964,30 @@ class Gscreen:
 
     def init_themes(self):
         # If there are themes then add them to combo box
+        model = self.widgets.theme_choice.get_model()
+        model.clear()
+        model.append(("Follow System Theme",))
+        themes = []
+        if os.path.exists(userthemedir):
+            names = os.listdir(userthemedir)
+            names.sort()
+            for dirs in names:
+                sbdirs = os.listdir(os.path.join(userthemedir, dirs))
+                if 'gtk-2.0' in sbdirs:
+                    themes.append(dirs)
         if os.path.exists(themedir):
-            model = self.widgets.theme_choice.get_model()
-            model.clear()
-            model.append(("Follow System Theme",))
-            temp = 0
             names = os.listdir(themedir)
             names.sort()
-            for search,dirs in enumerate(names):
-                model.append((dirs,))
-                if dirs  == self.data.theme_name:
-                    temp = search+1
-            self.widgets.theme_choice.set_active(temp)
+            for dirs in names:
+                sbdirs = os.listdir(os.path.join(themedir, dirs))
+                if 'gtk-2.0' in sbdirs:
+                    themes.append(dirs)
+        temp = 0
+        for index,theme in enumerate(themes):
+            model.append((theme,))
+            if theme == self.data.theme_name:
+                temp = index+1
+        self.widgets.theme_choice.set_active(temp)
         settings = gtk.settings_get_default()
         if not self.data.theme_name == "Follow System Theme":
             settings.set_string_property("gtk-theme-name", self.data.theme_name, "")
@@ -2351,6 +2367,14 @@ class Gscreen:
             rate = self.data.feed_override + percent_rate
         if rate > self.data.feed_override_max: rate = self.data.feed_override_max
         self.emc.feed_override(rate)
+
+    def set_rapid_override(self,percent_rate,absolute=False):
+        if absolute:
+            rate = percent_rate
+        else:
+            rate = self.data.rapid_override + percent_rate
+        if rate > self.data.rapid_override_max: rate = self.data.rapid_override_max
+        self.emc.rapid_override(rate)
 
     def set_spindle_override(self,percent_rate,absolute=False):
         if absolute:

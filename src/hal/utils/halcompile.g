@@ -37,7 +37,7 @@ parser Hal:
     token NUMBER: "0x[0-9a-fA-F]+|[+-]?[0-9]+"
     token STRING: "\"(\\.|[^\\\"])*\""
     token HEADER: "<.*?>"
-    token POP: "[-()+*/]|&&|\\|\\||personality|==|&|!=|<|<=|>|>="
+    token POP: "[-()+*/]|&&|\\|\\||personality|==|&|!=|<<|<|<=|>>|>|>="
     token TSTRING: "\"\"\"(\\.|\\\n|[^\\\"]|\"(?!\"\")|\n)*\"\"\""
 
     rule File: ComponentDeclaration Declaration* "$" {{ return True }}
@@ -255,6 +255,7 @@ def prologue(f):
 #include "rtapi_string.h"
 #include "rtapi_errno.h"
 #include "hal.h"
+#include "rtapi_math64.h"
 
 static int comp_id;
 """

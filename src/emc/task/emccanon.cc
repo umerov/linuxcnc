@@ -644,7 +644,7 @@ static AccelData getStraightAcceleration(double x, double y, double z,
 		}
 	}
 	if(debug_velacc) 
-        printf("cartesian %d ang %d acc %g\n", cartesian_move, angular_move, out.acc);
+        printf("cartesian %d ang %d acc %g\n", canon.cartesian_move, canon.angular_move, out.acc);
     return out;
 }
 
@@ -788,7 +788,7 @@ static VelData getStraightVelocity(double x, double y, double z,
     }
 	
     if(debug_velacc) 
-        printf("cartesian %d ang %d vel %g\n", cartesian_move, angular_move, out.vel);
+        printf("cartesian %d ang %d vel %g\n", canon.cartesian_move, canon.angular_move, out.vel);
     return out;
 }
 
@@ -1446,9 +1446,9 @@ void ARC_FEED(int line_number,
 
 
     canon_debug("start = %f %f %f\n",
-            canonEndPoint.x,
-            canonEndPoint.y,
-            canonEndPoint.z);
+            canon.endPoint.x,
+            canon.endPoint.y,
+            canon.endPoint.z);
     canon_debug("end = %f %f %f\n",
             end_cart.x,
             end_cart.y,
@@ -1598,6 +1598,13 @@ void ARC_FEED(int line_number,
     canon_debug("full turns = %d\n", full_turns);
 
 	canon_debug("full_angle = %.17e\n", full_angle);
+	
+	//Use total angle to get spiral properties
+    double spiral = end_radius - start_radius;
+    double dr = spiral / fabs(full_angle);
+    double min_radius = fmin(start_radius, end_radius);
+    double effective_radius = sqrt(dr*dr + min_radius*min_radius);
+	
     // KLUDGE: assumes 0,1,2 for X Y Z
     // Find normal axis
     int norm_axis_ind = (2 - shift_ind) % 3;
@@ -1620,12 +1627,6 @@ void ARC_FEED(int line_number,
     double a_max_normal = a_max_axes * sqrt(3.0)/2.0;
     canon_debug("a_max_axes = %f\n", a_max_axes);
 	
-	//Use total angle to get spiral properties
-    double spiral = end_radius - start_radius;
-    double dr = spiral / fabs(full_angle);
-    double min_radius = fmin(start_radius, end_radius);
-    double effective_radius = sqrt(dr*dr + min_radius*min_radius);
-
     // Compute the centripetal acceleration
     double v_max_radial = sqrt(a_max_normal * effective_radius);
     canon_debug("v_max_radial = %f\n", v_max_radial);
@@ -1637,9 +1638,6 @@ void ARC_FEED(int line_number,
     // Find the equivalent maximum velocity for a linear displacement
     // This accounts for speed restrictions due to helical and other axes
     VelData veldata = getStraightVelocity(endpt);
-
-    double t_motion = axis_motion_time(canon.endPoint,endpt);
-    canon_debug("t_motion = %f\n", t_motion);
 	
     // Compute spiral length, first by the minimum circular arc length
     double circular_length = min_radius * fabs(full_angle);
@@ -1667,30 +1665,21 @@ void ARC_FEED(int line_number,
 
 
 //COMPUTE ACCEL
-    // Compute max acceleration from axis motion (parameterized by axis, units t^2)
-    double tt_motion = axis_acc_time(canon.endPoint, endpt);
-    double a_max = a_max_planar;
 
-    // Account for axial acceleration if we have helical motion
-    if (axis_valid(norm_axis_ind)) {
-        double a_max_axial = FROM_EXT_LEN(emcAxisGetMaxAcceleration(norm_axis_ind));
-        a_max = MIN(a_max, a_max_axial);
-    }
-    // Use "straight" acceleration measure to compute acceleration bounds due
+	// Use "straight" acceleration measure to compute acceleration bounds due
     // to non-circular components (helical axis, other axes)
     AccelData accdata = getStraightAcceleration(endpt);
-
+	
     double tt_max_motion = accdata.tmax;
     double tt_max_spiral = spiral_length / a_max_axes;
     double tt_max = fmax(tt_max_motion, tt_max_spiral);
 
     // a_max could be higher than a_max_axes, but the projection onto the
     // circle plane and helical axis will still be within limits
-    double a_max = total_xyz_length / tt_max;
+    double a_max = total_xyz_length / tt_max;	
 
     // Limit velocity by maximum
     double vel = MIN(canon.linearFeedRate, v_max);
-
     canon_debug("current F = %f\n",currentLinearFeedRate);
     canon_debug("vel = %f\n",vel);
 

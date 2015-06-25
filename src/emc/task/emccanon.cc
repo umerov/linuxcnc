@@ -592,41 +592,42 @@ static AccelData getStraightAcceleration(double x, double y, double z,
         else
             out.dtot = sqrt(du * du + dv * dv + dw * dw);
         
-	if (out.tmax > 0.0) {
-	    out.acc = out.dtot / out.tmax;
-	}
+		if (out.tmax > 0.0) {
+			out.acc = out.dtot / out.tmax;
+		}
 	}
     // Pure angular move:
     else if (!canon.cartesian_move && canon.angular_move) {
-	ta = da? (da / FROM_EXT_ANG(emcAxisGetMaxAcceleration(3))): 0.0;
-	tb = db? (db / FROM_EXT_ANG(emcAxisGetMaxAcceleration(4))): 0.0;
-	tc = dc? (dc / FROM_EXT_ANG(emcAxisGetMaxAcceleration(5))): 0.0;
-		out.tmax = MAX3(ta, tb, tc);
+		ta = da? (da / FROM_EXT_ANG(emcAxisGetMaxAcceleration(3))): 0.0;
+		tb = db? (db / FROM_EXT_ANG(emcAxisGetMaxAcceleration(4))): 0.0;
+		tc = dc? (dc / FROM_EXT_ANG(emcAxisGetMaxAcceleration(5))): 0.0;
+			out.tmax = MAX3(ta, tb, tc);
+			
+		out.dtot = sqrt(da * da + db * db + dc * dc);
 		
-	out.dtot = sqrt(da * da + db * db + dc * dc);
-	if (out.tmax > 0.0) {
-	    out.acc = out.dtot / out.tmax;
-	}
+		if (out.tmax > 0.0) {
+			out.acc = out.dtot / out.tmax;
+		}
 	}
     // Combination angular and linear move:
     else if (canon.cartesian_move && canon.angular_move) {
-	tx = dx? (dx / FROM_EXT_LEN(emcAxisGetMaxAcceleration(0))): 0.0;
-	ty = dy? (dy / FROM_EXT_LEN(emcAxisGetMaxAcceleration(1))): 0.0;
-	tz = dz? (dz / FROM_EXT_LEN(emcAxisGetMaxAcceleration(2))): 0.0;
-	ta = da? (da / FROM_EXT_ANG(emcAxisGetMaxAcceleration(3))): 0.0;
-	tb = db? (db / FROM_EXT_ANG(emcAxisGetMaxAcceleration(4))): 0.0;
-	tc = dc? (dc / FROM_EXT_ANG(emcAxisGetMaxAcceleration(5))): 0.0;
-	tu = du? (du / FROM_EXT_LEN(emcAxisGetMaxAcceleration(6))): 0.0;
-	tv = dv? (dv / FROM_EXT_LEN(emcAxisGetMaxAcceleration(7))): 0.0;
-	tw = dw? (dw / FROM_EXT_LEN(emcAxisGetMaxAcceleration(8))): 0.0;
+		tx = dx? (dx / FROM_EXT_LEN(emcAxisGetMaxAcceleration(0))): 0.0;
+		ty = dy? (dy / FROM_EXT_LEN(emcAxisGetMaxAcceleration(1))): 0.0;
+		tz = dz? (dz / FROM_EXT_LEN(emcAxisGetMaxAcceleration(2))): 0.0;
+		ta = da? (da / FROM_EXT_ANG(emcAxisGetMaxAcceleration(3))): 0.0;
+		tb = db? (db / FROM_EXT_ANG(emcAxisGetMaxAcceleration(4))): 0.0;
+		tc = dc? (dc / FROM_EXT_ANG(emcAxisGetMaxAcceleration(5))): 0.0;
+		tu = du? (du / FROM_EXT_LEN(emcAxisGetMaxAcceleration(6))): 0.0;
+		tv = dv? (dv / FROM_EXT_LEN(emcAxisGetMaxAcceleration(7))): 0.0;
+		tw = dw? (dw / FROM_EXT_LEN(emcAxisGetMaxAcceleration(8))): 0.0;
 		out.tmax = MAX9(tx, ty, tz,
                     ta, tb, tc,
                     tu, tv, tw);
-	}
+	
 
-    if(debug_velacc)
-        printf("getStraightAcceleration t^2 tx %g ty %g tz %g ta %g tb %g tc %g tu %g tv %g tw %g\n", 
-               tx, ty, tz, ta, tb, tc, tu, tv, tw);
+		if(debug_velacc)
+			printf("getStraightAcceleration t^2 tx %g ty %g tz %g ta %g tb %g tc %g tu %g tv %g tw %g\n", 
+				   tx, ty, tz, ta, tb, tc, tu, tv, tw);
 /*  According to NIST IR6556 Section 2.1.2.5 Paragraph A
     a combnation move is handled like a linear move, except
     that the angular axes are allowed sufficient time to
@@ -638,9 +639,9 @@ static AccelData getStraightAcceleration(double x, double y, double z,
         else
             out.dtot = sqrt(du * du + dv * dv + dw * dw);
 
-	if (out.tmax > 0.0) {
-	    out.acc = out.dtot / out.tmax;
-	}
+		if (out.tmax > 0.0) {
+			out.acc = out.dtot / out.tmax;
+		}
 	}
 	if(debug_velacc) 
         printf("cartesian %d ang %d acc %g\n", cartesian_move, angular_move, out.acc);
